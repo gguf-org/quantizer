@@ -1,3 +1,3 @@
-[submodule "vendor/repo"]
-	path = vendor/repo
+[submodule "ggml"]
+	path = ggml
 	url = https://github.com/mochiyaki/ggml
