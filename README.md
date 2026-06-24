@@ -56,6 +56,12 @@ The project is built on top of the `ggml` and `gguf-connector` libraries, provid
 * C++17 compatible compiler (GCC, Clang, or MSVC)
 * CMake 3.10+
 
+### Clone the code
+```bash
+git clone --recursive https://github.com/gguf-org/quantizer
+cd quantizer
+```
+
 ### Building
 
 ```bash

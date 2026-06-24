@@ -1,4 +1,8 @@
-cmake_minimum_required(VERSION 3.14)
+# 3.15+ is required so that CMP0091 defaults to NEW, which makes the
+# MSVC_RUNTIME_LIBRARY / CMAKE_MSVC_RUNTIME_LIBRARY settings below actually
+# take effect (on 3.14 they are silently ignored and MSVC falls back to the
+# dynamic CRT baked into CMAKE_<LANG>_FLAGS_<CONFIG>).
+cmake_minimum_required(VERSION 3.15)
 project(gguf-quantizer C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -46,6 +50,30 @@ if(NOT DEFINED BUILD_SHARED_LIBS)
     set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
 endif()
 
+# --------------------------------------------------------------------------
+# Make the build self-contained so the contents of bin/ can be copied to a
+# machine that never had a compiler/redistributable installed:
+#  - MSVC: statically link the CRT (no MSVCP140.dll/VCRUNTIME140*.dll/
+#    api-ms-win-crt-*.dll dependency). Must be set before add_subdirectory()
+#    so ggml's own targets (ggml.dll, ggml-base.dll) inherit it too, not just
+#    gguf_quantizer/quantizer.
+#  - ELF/Mach-O: point RPATH at the executable's own directory ($ORIGIN /
+#    @loader_path) instead of the absolute build-tree path, and bake that
+#    into the binaries even without running `cmake --install`.
+# --------------------------------------------------------------------------
+if(MSVC)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>" CACHE STRING "" FORCE)
+endif()
+
+set(CMAKE_SKIP_BUILD_RPATH FALSE)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
+if(APPLE)
+    set(CMAKE_INSTALL_RPATH "@loader_path")
+elseif(UNIX)
+    set(CMAKE_INSTALL_RPATH "$ORIGIN")
+endif()
+
 add_subdirectory(${GGML_DIR} ${CMAKE_BINARY_DIR}/ggml)
 
 # --------------------------------------------------------------------------
@@ -76,14 +104,13 @@ endif()
 
 # --------------------------------------------------------------------------
 # Make the build self-contained: avoid depending on a system-installed
-# C/C++ runtime beyond what ships with the OS by default.
+# C/C++ runtime beyond what ships with the OS by default. (MSVC's static CRT
+# is handled globally above via CMAKE_MSVC_RUNTIME_LIBRARY, before
+# add_subdirectory(ggml), so ggml's own DLLs get it too.)
 # --------------------------------------------------------------------------
 if(MINGW)
     target_link_options(gguf_quantizer PRIVATE -static-libgcc -static-libstdc++)
     target_link_options(quantizer      PRIVATE -static-libgcc -static-libstdc++)
-elseif(MSVC)
-    set_property(TARGET gguf_quantizer quantizer PROPERTY
-        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 elseif(UNIX AND NOT APPLE)
     # These are GCC-compatible runtime-linking options. Apple Clang uses the
     # system libc++/compiler runtime and rejects -static-libgcc.
