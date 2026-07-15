@@ -170,7 +170,7 @@ provide everything they need. If ggml adds a new type, extend the table in
 
 ## Acknowledgment
 
-Thanks all contributors in the Community🤖, The authors of ggml (MIT License). Really appreciate!♥️
+Thanks all contributors in the Community🤖, especially those authors of ggml (MIT License). Really appreciate!♥️
 
 ## License
 
