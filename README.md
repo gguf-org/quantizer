@@ -151,7 +151,7 @@ Set a global type of `q8_0`, but specifically use `q4_0` for all attention weigh
 ## Supported Types
 
 * **Floating Point**: `f32`, `f16`, `bf16`
-* **Standard Quants**: `q4_0`, `q4_1`, `q5_0`, `q5_1`, `q8_0`, `q1_0`
+* **Standard Quants**: `q4_0`, `q4_1`, `q5_0`, `q5_1`, `q8_0`, `q1_0`, `q2_0`
 * **K-Quants**: `q2_k`, `q3_k`, `q4_k`, `q5_k`, `q6_k`
 * **I-Quants**: `iq1_s`, `iq1_m`, `iq2_xxs`, `iq2_xs`, `iq2_s`, `iq3_xxs`, `iq3_s`, `iq4_nl`, `iq4_xs`
 * **T-Quants**: `tq1_0`, `tq2_0`
